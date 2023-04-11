@@ -12,7 +12,7 @@ class dataPlotter(QThread):
         self.plotData.setBackground('w')  # Set the background color of the layout widget
         self.initializePlotData(sensorList)
 
-    def initializePlotData(self,sensorList):
+    def initializePlotData(self, sensorList):
         self.num_points = 1000
         self.window_size = 40
         self.startTime = time.time()
@@ -74,13 +74,12 @@ class dataPlotter(QThread):
         for i in range(self.numSensors):
             if delCondition:
                 del self.ySenData[i][0]
-                if self.currTime - self.prevTime > 0.5:
-                    del self.ySenAvg[i][0]
+                del self.ySenAvg[i][0]
             self.ySenData[i].append(dataList[i])
-            if self.currTime - self.prevTime > 0.5:
-                buffer = self.ySenData[i][-self.window_size:]
-                self.ySenAvg[i].append(sum(buffer)/len(buffer))
+            buffer = self.ySenData[i][-self.window_size:]
+            self.ySenAvg[i].append(sum(buffer)/len(buffer))
             self.data_line_S1[i].setData(self.xT, self.ySenData[i])
+            print( self.currTime - self.prevTime )
             self.data_line_S1_avg[i].setData(self.xT, self.ySenAvg[i])
         self.currIND = self.currIND + 1
 

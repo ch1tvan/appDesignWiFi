@@ -154,12 +154,9 @@ class Ui_MainWindow(object):
         self.horizontalLayout.addWidget(self.plotData_1.plotData)
 
         # Plot 2
-        # self.plotData_2 = QtWidgets.QOpenGLWidget(self.horizontalLayoutWidget_4)
-        # self.plotData_2.setAutoFillBackground(True)
         self.plotData_2 = dataPlotter(self.horizontalLayoutWidget_4, ["Sensor 3", "Sensor 4"])
         self.plotData_2.setObjectName("plotData_2")
         self.horizontalLayout.addWidget(self.plotData_2.plotData)
-        # self.horizontalLayout.addWidget(self.plotData_2)
 
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
@@ -264,7 +261,10 @@ class Ui_MainWindow(object):
             self.serialMonitor.insertPlainText("Problem with Wireless Communication")
 
     def plotReceivedData(self, sen_data):
+        print("Plot 1")
         self.plotData_1.update_plot_data(sen_data[5:7])
+        # self.plotData_1.update_plot_data(sen_data[7:9])
+        print("Plot 2")
         self.plotData_2.update_plot_data(sen_data[7:9])
         # pass
 

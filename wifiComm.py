@@ -49,7 +49,6 @@ class wifiArduino(QThread):
             (message, self.clientIP) = self.wifiCon.recvfrom(self.bufferSize)
             lenHand = min(9,len(message))
             lenConn = min(22,len(message))
-            print(message[:lenConn])
             if message[:lenHand] == b'Handshake':
                 self.wifiCon.sendto(b'Handshake Server', self.clientIP)
                 print("Handshake signal obtained")
@@ -72,6 +71,7 @@ class wifiArduino(QThread):
         while True:
             (message, address) = self.wifiCon.recvfrom(self.bufferSize)
             dataIn = message.decode('ASCII').strip()
+            dataIn = dataIn.rstrip('\x00')
             dataList = dataIn.split(',')
             isNum, numList = self.numerize(dataList)
             if len(dataList) >= 10:  # If the data is actual data (with sensors heaters and the like)
@@ -85,7 +85,8 @@ class wifiArduino(QThread):
         pass
 
     def write(self, sendStr):
-        bytes2Send = sendStr.encode('ascii')
+        bytes2Send = sendStr.encode()
+        print(bytes2Send)
         self.wifiCon.sendto(bytes2Send, self.clientIP)
 
     def numerize(self, textList):
