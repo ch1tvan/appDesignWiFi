@@ -12,6 +12,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from serialArduino_v2 import *
 from fileIO_v1 import *
 from dataPlotter import *
+from wifiComm import *
 
 class Ui_MainWindow(object):
 
@@ -171,8 +172,6 @@ class Ui_MainWindow(object):
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
-        self.setupSerial()
-
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
@@ -186,8 +185,7 @@ class Ui_MainWindow(object):
         self.serialMonitor.append(datetime.now().strftime("%H:%M:%S, ") + commandLine)
         # print(commandArd)
         # print(commandLine)
-        if self.isArdConnected:
-            self.arduinoSer.write(commandArd)
+        self.ardWifi.write(commandArd)
         self.dataCommentWriter.writeComment(commandLine)
 
     def commentSelected(self):
@@ -202,16 +200,14 @@ class Ui_MainWindow(object):
     def readButtonPressed(self):
         self.readButton.setStyleSheet("background-color: rgb(0, 200, 0); color: rgb(255, 255, 255);")
         self.stopButton.setStyleSheet("background-color: rgb(80, 20, 20);")
-        if self.isArdConnected:
-            self.arduinoSer.write('r')
+        self.ardWifi.write('r')
         self.serialMonitor.append(datetime.now().strftime("%H:%M:%S, ") + "Started Reading")
         self.dataCommentWriter.writeComment("Reading_Started")
 
     def stopButtonPressed(self):
         self.stopButton.setStyleSheet("background-color: rgb(200, 0, 0); color: rgb(255, 255, 255);")
         self.readButton.setStyleSheet("background-color: rgb(20, 80, 20); color: rgb(0, 0, 0);")
-        if self.isArdConnected:
-            self.arduinoSer.write('s')
+        self.ardWifi.write('s')
         self.serialMonitor.append(datetime.now().strftime("%H:%M:%S, ") + "Stopped Reading")
         self.dataCommentWriter.writeComment("Reading_Stopped")
 
@@ -225,8 +221,7 @@ class Ui_MainWindow(object):
             self.commandComment.writeCommand2File([commandLine, command2Arduino])
             self.commandLine.append(commandLine)
             self.commandArd.append(command2Arduino)
-        if self.isArdConnected:
-            self.arduinoSer.write(command2Arduino)
+        self.ardWifi.write(command2Arduino)
         self.serialMonitor.append(datetime.now().strftime("%H:%M:%S, ") + commandLine)
         self.dataCommentWriter.writeComment(commandLine)
         self.inputCommand.clear()
@@ -248,21 +243,32 @@ class Ui_MainWindow(object):
     def setupSerial(self):
         # Serial Connection Establishing
         self.arduinoSer = serialArduino()
-        self.isArdConnected = self.arduinoSer.setupSerial()
+        isArdConnected = self.arduinoSer.setupSerial()
         self.arduinoSer.send2Plot.connect(self.plotReceivedData)
-        self.arduinoSer.send2SerialMonitor.connect(self.arduino2serData)
-        if self.isArdConnected:
+        self.arduinoSer.send2SerialMonitor.connect(self.comm2serData)
+        if isArdConnected:
             self.serialMonitor.insertPlainText("Serial Connection to Arduino Established")
             self.arduinoSer.start()
         else:
             self.serialMonitor.insertPlainText("Problem with Serial Communication")
+
+    def setupWifi(self):
+        self.ardWifi = wifiArduino()
+        isWifiConnected = self.ardWifi.setupWifi()
+        self.ardWifi.send2Plot.connect(self.plotReceivedData)
+        self.ardWifi.send2SerialMonitor.connect(self.comm2serData)
+        if isWifiConnected:
+            self.serialMonitor.insertPlainText("Wi-Fi Connection to Arduino Established")
+            self.ardWifi.start()
+        else:
+            self.serialMonitor.insertPlainText("Problem with Wireless Communication")
 
     def plotReceivedData(self, sen_data):
         self.plotData_1.update_plot_data(sen_data[5:7])
         self.plotData_2.update_plot_data(sen_data[7:9])
         # pass
 
-    def arduino2serData(self, printData):
+    def comm2serData(self, printData):
         self.serialMonitor.append(datetime.now().strftime("%H:%M:%S, ") + printData)
 
 if __name__ == "__main__":
@@ -272,5 +278,7 @@ if __name__ == "__main__":
     ui = Ui_MainWindow()
     ui.setupUi(MainWindow)
     MainWindow.show()
-    ui.stopButtonPressed()
+    # ui.setupSerial()
+    ui.setupWifi()
+    # ui.stopButtonPressed()
     sys.exit(app.exec_())
