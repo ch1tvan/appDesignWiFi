@@ -20,12 +20,12 @@ class wifiArduino(QThread):
     send2Plot = pyqtSignal(list)
     send2SerialMonitor = pyqtSignal(str)
 
-    def __init__(self):
+    def __init__(self,file_writer):
         super().__init__()
-        self.host = '192.168.1.83'  # '192.168.4.2' # Use static addresses for both ESp32 and laptop/computer
+        self.host = '192.168.1.150'  # '192.168.4.2' # Use static addresses for both ESp32 and laptop/computer
         self.port = 7394        # Communication port number: Has to be same as used in ESP32/Arduino
         self.bufferSize = 255
-        self.serialFileWrite = fIO.DataFileIO()
+        self.serialFileWrite = file_writer
 
     def setupWifi(self):
         try:

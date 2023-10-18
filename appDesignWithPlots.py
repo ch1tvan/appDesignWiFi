@@ -250,7 +250,7 @@ class Ui_MainWindow(object):
             self.serialMonitor.insertPlainText("Problem with Serial Communication")
 
     def setupWifi(self):
-        self.ardWifi = wifiArduino()
+        self.ardWifi = wifiArduino(self.dataCommentWriter)
         isWifiConnected = self.ardWifi.setupWifi()
         self.ardWifi.send2Plot.connect(self.plotReceivedData)
         self.ardWifi.send2SerialMonitor.connect(self.comm2serData)
